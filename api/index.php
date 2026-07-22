@@ -1,6 +1,6 @@
 <?php
 $path = __DIR__."/api/data.json";
-$data = json_decode(file_get_contents($path), true);
+$data = json_decode(file_get_contents(__DIR__ . '/data.json'), true);
 $slug = $_GET['id'] ?? 'willy';
 
 if (!isset($data[$slug])) {
