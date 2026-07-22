@@ -12,4 +12,19 @@
     }
   ]
 }
-
+{
+  "rewrites": [
+    {
+      "source": "/image/(.*)",
+      "destination": "/image/$1"
+    },
+    {
+      "source": "/download_vcf.php",
+      "destination": "/api/download_vcf.php"
+    },
+    {
+      "source": "/(.*)",
+      "destination": "/api/index.php"
+    }
+  ]
+}
