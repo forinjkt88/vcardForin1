@@ -7,8 +7,8 @@
     "phone": "02154358009",
      "wechat_qr": "api/image/wechat/wechat-willy.png",
     "email": "willy@jkt.forinlogistics.com",
-    "logo": "/api/image/logo-forin.png",
-    "banner": "/api/image/logo-forin.png",
+    "logo": "api/image/logo-forin.png",
+    "banner": "api/image/logo-forin.png",
     "social": {
       "youtube": "https://youtube.com/@forinlogistics",
       "instagram": "https://instagram.com/forinlogistics",
