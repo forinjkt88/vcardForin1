@@ -1,13 +1,17 @@
 {
   "functions": {
-    "api/index.php": {
-      "runtime": "vercel-php@0.6.0"
+    "api/*.php": {
+      "runtime": "vercel-community/php@0.4.3"
     }
   },
-  "routes": [
+  "rewrites": [
     {
-      "src": "/(.*)",
-      "dest": "/api/index.php"
+      "source": "/download_vcf.php",
+      "destination": "/api/download_vcf.php"
+    },
+    {
+      "source": "/(.*)",
+      "destination": "/api/index.php"
     }
   ]
 }
