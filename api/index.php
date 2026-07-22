@@ -20,30 +20,9 @@ if (substr($wa_number, 0, 1) === '0') {
     $wa_number = '62' . substr($wa_number, 1);
 }
 
-// TRIK ANTI-BLOKIR VERCEL: Konversi gambar fisik ke teks data (Base64)
-function getInlineImage($json_path) {
-    if (empty($json_path)) return '';
-    
-    // Membersihkan teks path dari tulisan 'api/' agar akurat
-    $clean_path = str_replace('api/', '', $json_path);
-    $clean_path = ltrim($clean_path, '/');
-    $abs_path = __DIR__ . '/' . $clean_path;
-    
-    if (file_exists($abs_path)) {
-        $ext = pathinfo($abs_path, PATHINFO_EXTENSION);
-        $mime = ($ext === 'jpg' || $ext === 'jpeg') ? 'image/jpeg' : 'image/png';
-        $data = file_get_contents($abs_path);
-        return 'data:' . $mime . ';base64,' . base64_encode($data);
-    }
-    return ''; 
-}
-
-$logo_src = getInlineImage($user['logo'] ?? '');
-$banner_src = getInlineImage($user['banner'] ?? '');
-$wechat_src = getInlineImage($user['wechat_qr'] ?? '');
-
-$banner_style = !empty($banner_src) 
-    ? "background: url('" . $banner_src . "') center/cover no-repeat;" 
+// Banner Background
+$banner_style = !empty($user['banner']) 
+    ? "background: url('" . htmlspecialchars($user['banner']) . "') center/cover no-repeat;" 
     : "background: linear-gradient(135deg, #004488, #d9232a);";
 ?>
 
@@ -102,8 +81,8 @@ $banner_style = !empty($banner_src)
         <div class="cover-banner" style="<?= $banner_style ?>"></div>
         
         <!-- Panggil Logo -->
-        <?php if (!empty($logo_src)): ?>
-            <img src="<?= $logo_src ?>" alt="Logo" class="logo">
+        <?php if (!empty($user['logo'])): ?>
+            <img src="<?= htmlspecialchars($user['logo']) ?>" alt="Logo" class="logo">
         <?php endif; ?>
         
         <div class="name"><?= htmlspecialchars($user['name']) ?></div>
@@ -180,8 +159,8 @@ $banner_style = !empty($banner_src)
     <div class="modal-box">
         <span class="close-btn" onclick="closeWeChatModalDirect()">&times;</span>
         <h4 style="margin: 5px 0 10px;">Scan WeChat QR</h4>
-        <?php if (!empty($wechat_src)): ?>
-            <img src="<?= $wechat_src ?>" alt="WeChat QR Code">
+        <?php if (!empty($user['wechat_qr'])): ?>
+            <img src="<?= htmlspecialchars($user['wechat_qr']) ?>" alt="WeChat QR Code">
         <?php else: ?>
             <p style="color:#888; font-size:12px;">QR Code tidak tersedia.</p>
         <?php endif; ?>
