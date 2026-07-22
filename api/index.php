@@ -20,19 +20,30 @@ if (substr($wa_number, 0, 1) === '0') {
     $wa_number = '62' . substr($wa_number, 1);
 }
 
-// Otomatis memperbaiki jalur gambar agar selalu tampil di Vercel
-$banner_path = $user['banner'] ?? '';
-if (strpos($banner_path, '/api/') === false && !empty($banner_path)) {
-    $banner_path = '/api/' . ltrim($banner_path, '/');
+// TRIK ANTI-BLOKIR VERCEL: Konversi gambar fisik ke teks data (Base64)
+function getInlineImage($json_path) {
+    if (empty($json_path)) return '';
+    
+    // Membersihkan teks path dari tulisan 'api/' agar akurat
+    $clean_path = str_replace('api/', '', $json_path);
+    $clean_path = ltrim($clean_path, '/');
+    $abs_path = __DIR__ . '/' . $clean_path;
+    
+    if (file_exists($abs_path)) {
+        $ext = pathinfo($abs_path, PATHINFO_EXTENSION);
+        $mime = ($ext === 'jpg' || $ext === 'jpeg') ? 'image/jpeg' : 'image/png';
+        $data = file_get_contents($abs_path);
+        return 'data:' . $mime . ';base64,' . base64_encode($data);
+    }
+    return ''; 
 }
 
-$logo_path = $user['logo'] ?? '';
-if (strpos($logo_path, '/api/') === false && !empty($logo_path)) {
-    $logo_path = '/api/' . ltrim($logo_path, '/');
-}
+$logo_src = getInlineImage($user['logo'] ?? '');
+$banner_src = getInlineImage($user['banner'] ?? '');
+$wechat_src = getInlineImage($user['wechat_qr'] ?? '');
 
-$banner_style = !empty($banner_path) 
-    ? "background: url('" . htmlspecialchars($banner_path) . "') center/cover no-repeat;" 
+$banner_style = !empty($banner_src) 
+    ? "background: url('" . $banner_src . "') center/cover no-repeat;" 
     : "background: linear-gradient(135deg, #004488, #d9232a);";
 ?>
 
@@ -42,7 +53,7 @@ $banner_style = !empty($banner_path)
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>vCard - <?= htmlspecialchars($user['name']) ?></title>
-    <!-- FontAwesome 6 untuk Ikon -->
+    <!-- FontAwesome 6 -->
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
     <style>
         * { box-sizing: border-box; }
@@ -89,11 +100,15 @@ $banner_style = !empty($banner_path)
 <div class="card">
     <div class="profile">
         <div class="cover-banner" style="<?= $banner_style ?>"></div>
-        <img src="<?= htmlspecialchars($logo_path) ?>" alt="Logo" class="logo">
+        
+        <!-- Panggil Logo -->
+        <?php if (!empty($logo_src)): ?>
+            <img src="<?= $logo_src ?>" alt="Logo" class="logo">
+        <?php endif; ?>
+        
         <div class="name"><?= htmlspecialchars($user['name']) ?></div>
         <div class="title"><?= htmlspecialchars($user['title']) ?></div>
         
-        <!-- Tombol Aksi Utama -->
         <div class="actions">
             <a href="https://wa.me/<?= $wa_number ?>" target="_blank" class="action-btn">
                 <i class="fa-brands fa-whatsapp"></i>WHATSAPP
@@ -107,7 +122,6 @@ $banner_style = !empty($banner_path)
         </div>
     </div>
 
-    <!-- Informasi Detail -->
     <div class="details">
         <div class="detail-row">
             <div class="detail-icon"><i class="fa-solid fa-phone"></i></div>
@@ -119,7 +133,7 @@ $banner_style = !empty($banner_path)
         
         <?php if (!empty($user['phone'])): ?>
         <div class="detail-row">
-            <div class="detail-icon"></div> <!-- Kosong agar sejajar -->
+            <div class="detail-icon"></div>
             <div class="detail-info">
                 <div class="detail-val"><?= htmlspecialchars($user['phone']) ?></div>
                 <div class="detail-label">Telephone</div>
@@ -143,7 +157,6 @@ $banner_style = !empty($banner_path)
             </div>
         </div>
 
-        <!-- Social Media -->
         <?php if (!empty($user['social'])): ?>
         <div class="social-title">Social Media</div>
         <div class="social-group">
@@ -163,19 +176,12 @@ $banner_style = !empty($banner_path)
     </div>
 </div>
 
-<!-- Modal WeChat (Pop-up) -->
 <div id="wechatModal" class="modal-overlay" onclick="closeWeChatModal(event)">
     <div class="modal-box">
         <span class="close-btn" onclick="closeWeChatModalDirect()">&times;</span>
         <h4 style="margin: 5px 0 10px;">Scan WeChat QR</h4>
-        <?php 
-            $wechat_qr = $user['wechat_qr'] ?? '';
-            if (strpos($wechat_qr, '/api/') === false && !empty($wechat_qr)) {
-                $wechat_qr = '/api/' . ltrim($wechat_qr, '/');
-            }
-        ?>
-        <?php if (!empty($wechat_qr)): ?>
-            <img src="<?= htmlspecialchars($wechat_qr) ?>" alt="WeChat QR Code">
+        <?php if (!empty($wechat_src)): ?>
+            <img src="<?= $wechat_src ?>" alt="WeChat QR Code">
         <?php else: ?>
             <p style="color:#888; font-size:12px;">QR Code tidak tersedia.</p>
         <?php endif; ?>
