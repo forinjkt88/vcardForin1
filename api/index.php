@@ -1,4 +1,6 @@
 <?php
+echo "Current dir: " . __DIR__ . "<br>";
+echo "Path file: " . realpath('data.json') . "<br>";
 $data = json_decode(file_get_contents('./data.json'), true);
 $slug = $_GET['id'] ?? 'willy';
 
